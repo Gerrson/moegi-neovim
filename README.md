@@ -1,6 +1,6 @@
 # Moegi Theme for Neovim
 
-This repo ports the classic [Moegi VSCode theme](https://github.com/moegi-design/vscode-theme) to Neovim. It keeps the same nine variants, cold-green + warm-red accents, and palette structure while translating highlights, terminal colors, and statuslines for Neovim’s runtime.
+This repo ports the nice [Moegi VSCode theme](https://github.com/moegi-design/vscode-theme) to Neovim. It keeps the same nine variants, cold-green + warm-red accents, and palette structure while translating highlights, terminal colors, and statuslines for Neovim’s runtime.
 
 ## Highlights
 - Transparent-friendly setup with helpers that blend VSCode-style alpha colors into solid hex values that Neovim accepts.
