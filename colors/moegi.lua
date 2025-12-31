@@ -1,0 +1,1 @@
+require('moegi').load()
