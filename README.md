@@ -27,3 +27,7 @@ This repo ports the nice [Moegi VSCode theme](https://github.com/moegi-design/vs
 
 ## Contribution
 If you spot inconsistencies with the upstream VSCode theme or have ideas for improvements, open a PR and we’ll get the Neovim port synced up.
+
+## Extras
+- Ghostty terminal themes: `extras/ghostty/*.conf` (https://ghostty.org/).
+- WezTerm terminal themes: `extras/wezterm/*.lua` (https://wezterm.org/index.html).
