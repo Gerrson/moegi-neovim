@@ -4,190 +4,131 @@ local utils = require('moegi.utils')
 
 local M = {}
 
+-- Local aliases for speed
+local api = vim.api
+local opt = vim.opt
+local g = vim.g
+
+---@param target table
+---@param override table
+---@return table
 local function extend(target, override)
-  if type(override) ~= 'table' then
-    return override
-  end
-
-  local result = {}
-  for key, value in pairs(target or {}) do
-    result[key] = utils.deep_copy(value)
-  end
-
-  for key, value in pairs(override) do
-    if type(value) == 'table' and type(result[key]) == 'table' then
-      result[key] = extend(result[key], value)
-    else
-      result[key] = utils.deep_copy(value)
+    if type(override) ~= 'table' then return override or target end
+    local result = utils.deep_copy(target or {})
+    for k, v in pairs(override) do
+        if type(v) == 'table' and type(result[k]) == 'table' then
+            result[k] = extend(result[k], v)
+        else
+            result[k] = utils.deep_copy(v)
+        end
     end
-  end
-
-  return result
+    return result
 end
 
+---@param palette table
 local function set_terminal_colors(palette)
-  if not palette.ansi then
-    return
-  end
+    if not palette.ansi then return end
 
-  vim.g.terminal_color_0 = palette.ansi.black
-  vim.g.terminal_color_1 = palette.ansi.red
-  vim.g.terminal_color_2 = palette.ansi.green
-  vim.g.terminal_color_3 = palette.ansi.yellow
-  vim.g.terminal_color_4 = palette.ansi.blue
-  vim.g.terminal_color_5 = palette.ansi.magenta
-  vim.g.terminal_color_6 = palette.ansi.cyan
-  vim.g.terminal_color_7 = palette.ansi.white
-  vim.g.terminal_color_8 = palette.ansi.brightBlack
-  vim.g.terminal_color_9 = palette.ansi.brightRed
-  vim.g.terminal_color_10 = palette.ansi.brightGreen
-  vim.g.terminal_color_11 = palette.ansi.brightYellow
-  vim.g.terminal_color_12 = palette.ansi.brightBlue
-  vim.g.terminal_color_13 = palette.ansi.brightMagenta
-  vim.g.terminal_color_14 = palette.ansi.brightCyan
-  vim.g.terminal_color_15 = palette.ansi.brightWhite
+    local colors = {
+        palette.ansi.black, palette.ansi.red, palette.ansi.green, palette.ansi.yellow,
+        palette.ansi.blue, palette.ansi.magenta, palette.ansi.cyan, palette.ansi.white,
+        palette.ansi.brightBlack, palette.ansi.brightRed, palette.ansi.brightGreen,
+        palette.ansi.brightYellow, palette.ansi.brightBlue, palette.ansi.brightMagenta,
+        palette.ansi.brightCyan, palette.ansi.brightWhite
+    }
 
-  vim.g.terminal_color_background = palette.background
-  vim.g.terminal_color_foreground = palette.foreground
+    for i, color in ipairs(colors) do
+        g["terminal_color_" .. (i - 1)] = color
+    end
+
+    g.terminal_color_background = palette.background
+    g.terminal_color_foreground = palette.foreground
 end
 
-local function highlight(group, values)
-  vim.api.nvim_set_hl(0, group, values)
-end
-
+---@param palette table
+---@param cfg table
 local function apply_highlights(palette, cfg)
-  local bg = cfg.transparent and 'NONE' or palette.background
-  local fallback = cfg.transparent and palette.line or palette.background
+    local bg = cfg.transparent and 'NONE' or palette.background
+    local fallback = cfg.transparent and palette.line or palette.background
 
-  local function norm(color)
-    return utils.normalize_color(color, fallback)
-  end
+    -- Local helper to avoid repeating normalization logic
+    local function n(color) return utils.normalize_color(color, fallback) end
 
-  highlight('Normal', { fg = norm(palette.foreground), bg = norm(bg) })
-  highlight('NormalNC', { fg = norm(palette.foreground), bg = norm(bg) })
-  highlight('LineNr', { fg = norm(palette.gutter), bg = norm(bg) })
-  highlight('CursorLineNr', { fg = norm(palette.gutterActive), bg = norm(bg) })
-  highlight('Cursor', { fg = norm(palette.background), bg = norm(palette.cursor) })
-  highlight('CursorLine', { bg = norm(palette.line) })
-  highlight('CursorColumn', { bg = norm(palette.line) })
-  highlight('ColorColumn', { bg = norm(palette.commentBg) })
-  highlight('Visual', { bg = norm(palette.selection) })
-  highlight('Search', { bg = norm(palette.match), fg = norm(palette.background) })
-  highlight('IncSearch', { bg = norm(palette.match), fg = norm(palette.background) })
-  highlight('MatchParen', { fg = norm(palette.accent), bg = norm(bg), bold = true })
+    -- Definition of highlighting groups
+    local groups = {
+        -- UI Core
+        Normal       = { fg = n(palette.foreground), bg = n(bg) },
+        NormalNC     = { fg = n(palette.foreground), bg = n(bg) },
+        LineNr       = { fg = n(palette.gutter), bg = n(bg) },
+        CursorLineNr = { fg = n(palette.gutterActive), bg = n(bg) },
+        Cursor       = { fg = n(palette.background), bg = n(palette.cursor) },
+        CursorLine   = { bg = n(palette.line) },
+        Visual       = { bg = n(palette.selection) },
+        Search       = { bg = n(palette.match), fg = n(palette.background) },
+        MatchParen   = { fg = n(palette.accent), bg = n(bg), bold = true },
+        FloatBorder  = { fg = n(palette.border), bg = n(palette.menu) },
+        NormalFloat  = { fg = n(palette.foreground), bg = n(palette.menu) },
 
-  highlight('Pmenu', { fg = norm(palette.foreground), bg = norm(palette.menu) })
-  highlight('PmenuSel', { fg = norm(palette.foreground), bg = norm(palette.menuSelection) })
-  highlight('PmenuSbar', { bg = norm(utils.shade(norm(palette.menu), 0.15, palette.background)) })
-  highlight('PmenuThumb', { bg = norm(utils.shade(norm(palette.menuSelection), 0.2, palette.background)) })
-  highlight('FloatBorder', { fg = norm(palette.border), bg = norm(palette.menu) })
-  highlight('NormalFloat', { fg = norm(palette.foreground), bg = norm(palette.menu) })
+        -- Syntax
+        Comment      = { fg = n(palette.comment), italic = cfg.italics.comments },
+        Keyword      = { fg = n(palette.keyword), italic = cfg.italics.keywords },
+        Function     = { fg = n(palette.func), italic = cfg.italics.functions },
+        String       = { fg = n(palette.string), italic = cfg.italics.strings },
+        Identifier   = { fg = n(palette.foreground) },
+        Type         = { fg = n(palette.type) },
+        Constant     = { fg = n(palette.constant) },
+        Number       = { fg = n(palette.number) },
+        Operator     = { fg = n(palette.operator) },
 
-  highlight('Whitespace', { fg = norm(palette.comment) })
-  highlight('NonText', { fg = norm(palette.comment) })
-  highlight('Comment', { fg = norm(palette.comment), italic = cfg.italics.comments })
-  highlight('Todo', { fg = norm(palette.accent), bold = true })
+        -- Treesitter (Modern syntax)
+        ["@variable"]  = { fg = n(palette.variable), italic = cfg.italics.variables },
+        ["@parameter"] = { fg = n(palette.variable), italic = cfg.italics.variables },
+        ["@comment"]   = { link = "Comment" },
+        ["@keyword"]   = { link = "Keyword" },
+        ["@function"]  = { link = "Function" },
+        ["@string"]    = { link = "String" },
 
-  highlight('Identifier', { fg = norm(palette.foreground) })
-  highlight('Function', { fg = norm(palette.func), italic = cfg.italics.functions })
-  highlight('Statement', { fg = norm(palette.keyword), italic = cfg.italics.keywords })
-  highlight('Keyword', { fg = norm(palette.keyword), italic = cfg.italics.keywords })
-  highlight('Operator', { fg = norm(palette.operator) })
-  highlight('Type', { fg = norm(palette.type) })
-  highlight('Constant', { fg = norm(palette.constant) })
-  highlight('Number', { fg = norm(palette.number) })
-  highlight('String', { fg = norm(palette.string), italic = cfg.italics.strings })
-  highlight('Character', { fg = norm(palette.string) })
-  highlight('Boolean', { fg = norm(palette.number) })
+        -- LSP Diagnostics
+        DiagnosticError = { fg = n(palette.error) },
+        DiagnosticWarn  = { fg = n(palette.warning) },
+        DiagnosticInfo  = { fg = n(palette.info) },
+        DiagnosticHint  = { fg = n(palette.accent) },
+        DiagnosticUnderlineError = { sp = n(palette.error), undercurl = true },
 
-  highlight('Error', { fg = norm(palette.error) })
-  highlight('ErrorMsg', { fg = norm(palette.error) })
-  highlight('WarningMsg', { fg = norm(palette.warning) })
-  highlight('DiagnosticError', { fg = norm(palette.error) })
-  highlight('DiagnosticWarn', { fg = norm(palette.warning) })
-  highlight('DiagnosticInfo', { fg = norm(palette.info) })
-  highlight('DiagnosticHint', { fg = norm(palette.accent) })
-  highlight('DiagnosticUnderlineError', { sp = norm(palette.error), undercurl = true })
-  highlight('DiagnosticUnderlineWarn', { sp = norm(palette.warning), undercurl = true })
-  highlight('DiagnosticUnderlineInfo', { sp = norm(palette.info), undercurl = true })
-  highlight('DiagnosticUnderlineHint', { sp = norm(palette.accent), undercurl = true })
+        -- Git
+        GitSignsAdd    = { fg = n(palette.string) },
+        GitSignsChange = { fg = n(palette.warning) },
+        GitSignsDelete = { fg = n(palette.error) },
+    }
 
-  highlight('DiffAdd', { fg = norm(palette.string), bg = norm(bg) })
-  highlight('DiffChange', { fg = norm(palette.keyword), bg = norm(bg) })
-  highlight('DiffDelete', { fg = norm(palette.error), bg = norm(bg) })
-  highlight('DiffText', { fg = norm(palette.warning), bg = norm(bg) })
-
-  local status_bg = norm(utils.shade(palette.menu, 0.12, palette.background))
-  local status_fg = norm(palette.foreground)
-  local inactive_bg = norm(bg)
-
-  highlight('StatusLine', { fg = status_fg, bg = status_bg, bold = true })
-  highlight('StatusLineNC', { fg = norm(palette.gutter), bg = status_bg })
-  highlight('WinSeparator', { fg = norm(palette.border), bg = inactive_bg })
-  highlight('VertSplit', { fg = norm(palette.border), bg = inactive_bg })
-  highlight('TabLine', { fg = norm(palette.gutter), bg = inactive_bg })
-  highlight('TabLineSel', { fg = status_fg, bg = norm(palette.line) })
-  highlight('StatusLineTerm', { fg = status_fg, bg = norm(palette.cursor) })
-  highlight('StatusLineTermNC', { fg = norm(palette.gutter), bg = norm(palette.background) })
-
-  highlight('LualineNormal', { fg = status_fg, bg = status_bg })
-  highlight('LualineInsert', { fg = norm(palette.background), bg = norm(palette.string) })
-  highlight('LualineVisual', { fg = norm(palette.background), bg = norm(palette.accent) })
-  highlight('LualineReplace', { fg = norm(palette.background), bg = norm(palette.warning) })
-  highlight('LualineCommand', { fg = norm(palette.background), bg = norm(palette.keyword) })
-  highlight('LualineTerminal', { fg = norm(palette.background), bg = norm(palette.info) })
-  highlight('LualineInactive', { fg = norm(palette.gutter), bg = inactive_bg })
-
-  highlight('HeirlineStatusLine', { fg = status_fg, bg = status_bg })
-  highlight('HeirlineBufferInfo', { fg = norm(palette.constant), bg = norm(palette.line) })
-  highlight('HeirlineBufferInactive', { fg = norm(palette.gutter), bg = inactive_bg })
-
-  highlight('GitSignsAdd', { fg = norm(palette.string) })
-  highlight('GitSignsChange', { fg = norm(palette.warning) })
-  highlight('GitSignsDelete', { fg = norm(palette.error) })
-
-  highlight('@comment', { fg = norm(palette.comment), italic = cfg.italics.comments })
-  highlight('@variable', { fg = norm(palette.variable), italic = cfg.italics.variables })
-  highlight('@function', { fg = norm(palette.func), italic = cfg.italics.functions })
-  highlight('@parameter', { fg = norm(palette.variable), italic = cfg.italics.variables })
-  highlight('@type', { fg = norm(palette.type) })
-  highlight('@constant', { fg = norm(palette.constant) })
-  highlight('@number', { fg = norm(palette.number) })
-  highlight('@string', { fg = norm(palette.string) })
-  highlight('@keyword', { fg = norm(palette.keyword), italic = cfg.italics.keywords })
-  highlight('@operator', { fg = norm(palette.operator) })
-  highlight('@tag', { fg = norm(palette.keyword) })
-end
-
-local function get_palette(name)
-  return palettes[name] or palettes['moegi-' .. name]
+    -- Apply all groups in a single loop
+    for group, settings in pairs(groups) do
+        api.nvim_set_hl(0, group, settings)
+    end
 end
 
 function M.setup(options)
-  config = setmetatable(config, { __index = extend(config.defaults, options or {}) })
+    config.defaults = extend(config.defaults, options or {})
 end
 
-function M.load(name)
-  local selected = name or config.theme
-  local palette = get_palette(selected)
+function M.load(theme_name)
+    local selected = theme_name or config.theme
+    local palette = palettes[selected] or palettes['moegi-' .. selected]
 
-  if not palette then
-    vim.notify(('moegi: unknown theme "%s"'):format(selected), vim.log.levels.ERROR)
-    return
-  end
+    if not palette then
+        api.nvim_err_writeln('moegi: unknown theme "' .. tostring(selected) .. '"')
+        return
+    end
 
-  local current = extend(palette, config.overrides)
+    local current = extend(palette, config.overrides)
 
-  vim.api.nvim_command('hi clear')
-  if vim.fn.exists('syntax_on') == 1 then
-    vim.api.nvim_command('syntax reset')
-  end
+    if vim.g.colors_name then api.nvim_command('hi clear') end
 
-  vim.o.termguicolors = true
-  vim.g.colors_name = 'moegi'
+    opt.termguicolors = true
+    g.colors_name = 'moegi'
 
-  set_terminal_colors(current)
-  apply_highlights(current, config)
+    set_terminal_colors(current)
+    apply_highlights(current, config.defaults)
 end
 
 return M
